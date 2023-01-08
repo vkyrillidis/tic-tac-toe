@@ -28,10 +28,17 @@ class Colours(Enum):
     BLUE = (0, 0, 255)
 
 
+class Sounds(Enum):
+    BACKGROUND = 1
+    TICK = 2
+    WIN = 3
+
+
 def is_within_block(mouse_position, block_position):
     block_side_size = WIN_SIZE // ROWS_NUM
     return (block_position.x < mouse_position.x < block_position.x + block_side_size and
             block_position.y < mouse_position.y < block_position.y + block_side_size)
+
 
 
 class TicTacToe:
@@ -53,7 +60,10 @@ class TicTacToe:
         self._display_surface = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self.assets = {
             Player.X: pygame.transform.scale(pygame.image.load("x.png"), (MARK_SIZE, MARK_SIZE)),
-            Player.O: pygame.transform.scale(pygame.image.load("o.png"), (MARK_SIZE, MARK_SIZE))
+            Player.O: pygame.transform.scale(pygame.image.load("o.png"), (MARK_SIZE, MARK_SIZE)),
+            Sounds.BACKGROUND: pygame.mixer.Sound("background_music.mp3"),
+            Sounds.WIN: pygame.mixer.Sound("win_sound.wav"),
+            Sounds.TICK: pygame.mixer.Sound("tick_sound.wav")
         }
 
     def _init_board(self):
@@ -110,6 +120,7 @@ class TicTacToe:
             winning_player = board[0][2].player
 
         if game_won:
+            self.assets[Sounds.WIN].play(0)
             self._display_message(f"Player {winning_player} has won!")
             self._init_board()
 
@@ -152,6 +163,9 @@ class TicTacToe:
         """
         self._init_board()
 
+        background_music = self.assets[Sounds.BACKGROUND]
+        background_music.play(-1)
+
         while self._running:
             for event in pygame.event.get():
                 self._handle_events(event)
@@ -165,15 +179,11 @@ class TicTacToe:
         for i in range(len(self._game_board)):
             for j in range(len(self._game_board[i])):
                 current_block = self._game_board[i][j]
-                # Debugging TODO: Remove
-                if is_within_block(Position(mouse_x, mouse_y), current_block.position):
-                    print(
-                        f"Clicked inside: {current_block}, Players turn: {self._player_turn}")
                 if is_within_block(Position(mouse_x, mouse_y), current_block.position) and current_block.isEmpty:
                     player = Player.X.value if self._player_turn else Player.O.value
+                    self.assets[Sounds.TICK].play(0)
                     self._game_board[i][j] = Block(current_block.position, player, False)
                     self._player_turn = not self._player_turn
-                    print(f"Updated block: {self._game_board[i][j]}")  # Debugging TODO: Remove
 
     def _draw_grid(self):
         """
