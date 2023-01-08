@@ -12,11 +12,12 @@ WIN_SIZE = 600
 ROWS_NUM = 3
 MARK_SIZE = WIN_SIZE // ROWS_NUM * 0.8
 LINE_THICKNESS = 10
+TWO_SECONDS = 2000  # In millis
 
 
 class Player(Enum):
-    X = "x"
-    O = "o"
+    X = "X"
+    O = "O"
 
 
 class Colours(Enum):
@@ -99,33 +100,31 @@ class TicTacToe:
                 winning_player = board[0][i].player
 
         # Check diagonal
-        if board[0][0].player != "" and board[1][1] == board[2][2].player == board[0][0].player:
+        if board[0][0].player != "" and board[1][1].player == board[2][2].player == board[0][0].player:
             game_won = True
             winning_player = board[0][0].player
 
         # Check reverse diagonal
-        if board[0][2].player != "" and board[1][1] == board[2][0].player == board[0][2].player:
+        if board[0][2].player != "" and board[1][1].player == board[2][0].player == board[0][2].player:
             game_won = True
             winning_player = board[0][2].player
+
+        if game_won:
+            self._display_message(f"Player {winning_player} has won!")
+            self._init_board()
 
         if self._game_draw():
             self._display_message("It's a draw!")
             self._init_board()
 
-        if game_won:
-            self._display_message(f"{winning_player} has won!")
-            self._init_board()
-
-
     def _display_message(self, content):
-        pygame.time.delay(500)
         self._display_surface.fill(Colours.WHITE.value)
         end_text = self.font.render(content, True, Colours.BLACK.value)
         self._display_surface.blit(
             end_text, ((WIN_SIZE - end_text.get_width()) // 2, (WIN_SIZE - end_text.get_height()) // 2)
         )
         pygame.display.update()
-        pygame.time.delay(3000)
+        pygame.time.delay(TWO_SECONDS)
 
     def _game_draw(self):
         for i in range(len(self._game_board)):
